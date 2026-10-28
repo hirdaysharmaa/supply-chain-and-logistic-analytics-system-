@@ -1,0 +1,299 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "private_outputs": true,
+      "provenance": [],
+      "authorship_tag": "ABX9TyPAQjbpKJ2IsR0uM5+BHldn",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/hirdaysharmaa/supply-chain-and-logistic-analytics-system-/blob/main/module%201%20supply%20chain%20and%20logistic%20analytics%20\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "IWSKBtuueHge"
+      },
+      "outputs": [],
+      "source": [
+        "import numpy as np\n",
+        "import pandas as pd\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns\n",
+        "\n",
+        "sns.set_theme(style=\"whitegrid\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df=pd.read_csv(\"/content/dynamic_supply_chain_logistics_dataset.csv\")"
+      ],
+      "metadata": {
+        "id": "FyU_PupEe3dN"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.sample(2)"
+      ],
+      "metadata": {
+        "id": "xzSJ9FgBfpzS"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.columns"
+      ],
+      "metadata": {
+        "id": "AcYg8Y6pfriK"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df.info()"
+      ],
+      "metadata": {
+        "id": "3UbwsXxky7iK"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "**Demand analytics**\n",
+        "\n",
+        "here are two columns are used for demand analytics\n",
+        "1)timestamp\n",
+        "2)historical_demand"
+      ],
+      "metadata": {
+        "id": "Etng0qPSx4xZ"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "demand= df[[\"timestamp\", \"historical_demand\"]].copy()\n",
+        "\n",
+        "demand.head()"
+      ],
+      "metadata": {
+        "id": "RUaHUkF-plH-"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "**change the data type bcoz timestamp and historical demand columns are in object data type **"
+      ],
+      "metadata": {
+        "id": "yK98jD8CzNWs"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "demand[\"timestamp\"] = pd.to_datetime(\n",
+        "    demand[\"timestamp\"], errors=\"coerce\"\n",
+        ")"
+      ],
+      "metadata": {
+        "id": "Ai8OuTCyx8YR"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "demand[\"historical_demand\"] = pd.to_numeric(\n",
+        "    demand[\"historical_demand\"], errors=\"coerce\"\n",
+        ")"
+      ],
+      "metadata": {
+        "id": "Rqr4JXk6zFaz"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# drop null values\n",
+        "demand = demand.dropna()"
+      ],
+      "metadata": {
+        "id": "2PfYrL_vzhaP"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# sort values on the basis of  timestamp column\n",
+        "demand = demand.sort_values(\"timestamp\")\n",
+        "demand.head()"
+      ],
+      "metadata": {
+        "id": "xoBv_Vi0zp5y"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# it will describe the generate descriptive statistics\n",
+        "demand.describe()"
+      ],
+      "metadata": {
+        "id": "sSfJ7_Drz3ji"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# this is the manual way of describe\n",
+        "print(\"Average demand:\", round(demand[\"historical_demand\"].mean(), 2))\n",
+        "print(\"Highest demand:\", demand[\"historical_demand\"].max())\n",
+        "print(\"Lowest demand:\", demand[\"historical_demand\"].min())\n",
+        "print(\"Median demand:\", np.median(demand[\"historical_demand\"]))"
+      ],
+      "metadata": {
+        "id": "EZVOD73E0CvQ"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Set timestamp as index and calculate daily average demand\n",
+        "daily_demand = demand.set_index(\"timestamp\")[\"historical_demand\"].resample(\"D\").mean()\n",
+        "daily_demand.head()"
+      ],
+      "metadata": {
+        "id": "l_rkMR6T0bO_"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# here are we plot line chart and check daily average demand\n",
+        "plt.figure(figsize=(12, 5))\n",
+        "plt.plot(daily_demand.index,daily_demand.values,color=\"blue\")\n",
+        "plt.title(\"Daily Average Demand\")\n",
+        "plt.xlabel(\"Date\")\n",
+        "plt.ylabel(\"Average Demand\")\n",
+        "plt.xticks(rotation=45)\n",
+        "plt.tight_layout()\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "fRIfPc0n1hIU"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#create histogram to find values distributation\n",
+        "plt.figure(figsize=(10, 5))\n",
+        "sns.histplot(data=demand,x=\"historical_demand\",bins=20,color=\"green\")\n",
+        "plt.title(\"Demand Distribution\")\n",
+        "plt.xlabel(\"Historical Demand\")\n",
+        "plt.ylabel(\"Number of Records\")\n",
+        "plt.tight_layout()\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "pSRbNilk1ph9"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#create a bar chart to check month wise demand analysis\n",
+        "demand[\"month\"] = demand[\"timestamp\"].dt.strftime(\"%Y-%m\")\n",
+        "monthly_demand = (demand.groupby(\"month\")[\"historical_demand\"].mean())\n",
+        "plt.figure(figsize=(12, 5))\n",
+        "monthly_demand.plot(kind=\"bar\",color=\"pink\")\n",
+        "plt.title(\"Monthly Average Demand\")\n",
+        "plt.xlabel(\"Month\")\n",
+        "plt.ylabel(\"Average Demand\")\n",
+        "plt.xticks(rotation=45)\n",
+        "plt.tight_layout()\n",
+        "plt.show()"
+      ],
+      "metadata": {
+        "id": "iVUp3O2R2U9y"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Demand Analytics — Conclusion\n",
+        "\n",
+        "1. Average historical demand:6022\n",
+        "2. Highest recorded demand: 9999.9999997523\n",
+        "3. Lowest recorded demand: 100.0029656047095\n",
+        "4. Daily demand trend: The graph shows that daily demand fluctuates over time. Demand generally remains around 5,000 – 7,000 units, with some peaks and sudden drops. There is no clear, consistent increasing or decreasing trend.\n",
+        "5. Highest monthly average demand was observed in:10000\n"
+      ],
+      "metadata": {
+        "id": "SEUiL8us3IpS"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "v_MEWN__25Nj"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
